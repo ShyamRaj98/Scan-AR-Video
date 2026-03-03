@@ -1,27 +1,67 @@
 import Marker from "../models/Marker.js";
+import cloudinary from "../config/cloudinary.js";
+import streamifier from "streamifier";
 
-// Create Marker
+// Helper function to upload buffer to cloudinary
+const uploadToCloudinary = (fileBuffer, folder, resourceType = "image") => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: resourceType,
+        transformation:
+          resourceType === "video"
+            ? [{ quality: "auto" }, { fetch_format: "mp4" }]
+            : [],
+      },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
+};
+
+// CREATE MARKER
 export const createMarker = async (req, res) => {
   try {
     const { title } = req.body;
 
-    const markerImage = req.files["markerImage"][0].path;
-    const videoUrl = req.files["video"][0].path;
+    const markerImageFile = req.files["markerImage"][0];
+    const videoFile = req.files["video"][0];
+
+    // Upload image
+    const imageUpload = await uploadToCloudinary(
+      markerImageFile.buffer,
+      "ar-markers",
+      "image"
+    );
+
+    // Upload video (compressed automatically)
+    const videoUpload = await uploadToCloudinary(
+      videoFile.buffer,
+      "ar-videos",
+      "video"
+    );
 
     const marker = await Marker.create({
       title,
-      markerImage,
-      videoUrl,
-      createdBy: req.user._id
+      markerImage: imageUpload.secure_url,
+      videoUrl: videoUpload.secure_url,
+      imagePublicId: imageUpload.public_id,
+      videoPublicId: videoUpload.public_id,
+      createdBy: req.user._id,
     });
 
     res.status(201).json(marker);
   } catch (error) {
-    res.status(500).json({ message: "Marker upload failed" });
+    res.status(500).json({ message: "Marker upload failed", error });
   }
 };
 
-// Get All Markers
+// GET MARKERS
 export const getMarkers = async (req, res) => {
   try {
     const markers = await Marker.find().sort({ createdAt: -1 });
@@ -31,7 +71,7 @@ export const getMarkers = async (req, res) => {
   }
 };
 
-// Delete Marker
+// DELETE MARKER
 export const deleteMarker = async (req, res) => {
   try {
     const marker = await Marker.findById(req.params.id);
@@ -39,6 +79,12 @@ export const deleteMarker = async (req, res) => {
     if (!marker) {
       return res.status(404).json({ message: "Marker not found" });
     }
+
+    // Delete media from Cloudinary
+    await cloudinary.uploader.destroy(marker.imagePublicId);
+    await cloudinary.uploader.destroy(marker.videoPublicId, {
+      resource_type: "video",
+    });
 
     await marker.deleteOne();
 

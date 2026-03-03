@@ -11,7 +11,7 @@ router.post(
   protect,
   upload.fields([
     { name: "markerImage", maxCount: 1 },
-    { name: "video", maxCount: 1 }
+    { name: "video", maxCount: 1 },
   ]),
   createMarker
 );

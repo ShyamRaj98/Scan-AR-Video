@@ -4,22 +4,24 @@ const markerSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true
+      required: true,
     },
     markerImage: {
       type: String,
-      required: true
+      required: true,
     },
     videoUrl: {
       type: String,
-      required: true
+      required: true,
     },
+    imagePublicId: String,
+    videoPublicId: String,
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    }
+      ref: "User",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Marker = mongoose.model("Marker", markerSchema);
