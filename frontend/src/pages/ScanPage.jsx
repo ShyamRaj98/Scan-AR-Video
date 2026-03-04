@@ -121,7 +121,7 @@ export default function ScanPage() {
   }, [markers]);
 
   return (
-    <div className="w-screen h-screen relative overflow-hidden bg-black">
+    <div className="w-screen h-screen relative overflow-hidden bg-transparent">
       {/* 🔥 AR Canvas */}
       <div ref={containerRef} className="absolute inset-0" />
 
