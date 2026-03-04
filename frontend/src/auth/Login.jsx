@@ -1,3 +1,4 @@
+// frontend/src/auth/Login.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -22,7 +23,7 @@ function Login() {
       setError("");
       setLoading(true);
       await login(email, password);
-      // Navigation happens in the login function
+      // Navigation happens in the login function (to /admin)
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {
@@ -33,20 +34,16 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 px-4">
       <div className="bg-white shadow-2xl rounded-3xl w-full max-w-md p-8">
-        {/* HEADER */}
         <h2 className="text-3xl font-bold text-center mb-2">Welcome Back</h2>
         <p className="text-gray-500 text-center mb-8">Login to your account</p>
 
-        {/* ERROR */}
         {error && (
           <div className="mb-4 text-sm text-red-600 bg-red-100 p-3 rounded-lg">
             {error}
           </div>
         )}
 
-        {/* FORM */}
         <form onSubmit={submitHandle} className="space-y-5">
-          {/* EMAIL */}
           <div>
             <label className="text-sm font-medium">Email</label>
             <input
@@ -59,7 +56,6 @@ function Login() {
             />
           </div>
 
-          {/* PASSWORD */}
           <div>
             <label className="text-sm font-medium">Password</label>
             <div className="relative mt-1">
@@ -80,7 +76,6 @@ function Login() {
             </div>
           </div>
 
-          {/* BUTTON */}
           <button
             type="submit"
             disabled={loading}
@@ -90,11 +85,10 @@ function Login() {
           </button>
         </form>
 
-        {/* FOOTER */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Don't have an account?{" "}
           <Link
-            to="/register"
+            to="/register" // This stays the same
             className="text-black font-semibold hover:underline"
           >
             Register

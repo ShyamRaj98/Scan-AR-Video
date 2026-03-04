@@ -1,3 +1,4 @@
+// frontend/src/auth/Register.jsx
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
@@ -34,7 +35,7 @@ function Register() {
     try {
       setLoading(true);
       await register(name, email, password);
-      // Navigation happens in the register function
+      // Navigation happens in the register function (to /admin)
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || err.message || "Registration failed";
@@ -47,20 +48,16 @@ function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 px-4">
       <div className="bg-white shadow-2xl rounded-3xl w-full max-w-md p-8">
-        {/* HEADER */}
         <h2 className="text-3xl font-bold text-center mb-2">Create Account</h2>
         <p className="text-gray-500 text-center mb-8">Join us today</p>
 
-        {/* ERROR */}
         {error && (
           <div className="mb-4 text-sm text-red-600 bg-red-100 p-3 rounded-lg">
             {error}
           </div>
         )}
 
-        {/* FORM */}
         <form onSubmit={submitHandle} className="space-y-5">
-          {/* NAME */}
           <div>
             <label className="text-sm font-medium">Full Name</label>
             <input
@@ -73,7 +70,6 @@ function Register() {
             />
           </div>
 
-          {/* EMAIL */}
           <div>
             <label className="text-sm font-medium">Email</label>
             <input
@@ -86,7 +82,6 @@ function Register() {
             />
           </div>
 
-          {/* PASSWORD */}
           <div>
             <label className="text-sm font-medium">Password</label>
             <input
@@ -99,7 +94,6 @@ function Register() {
             />
           </div>
 
-          {/* CONFIRM PASSWORD */}
           <div>
             <label className="text-sm font-medium">Confirm Password</label>
             <input
@@ -112,7 +106,6 @@ function Register() {
             />
           </div>
 
-          {/* SHOW PASSWORD */}
           <div className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -123,7 +116,6 @@ function Register() {
             <label htmlFor="showPassword">Show password</label>
           </div>
 
-          {/* BUTTON */}
           <button
             type="submit"
             disabled={loading}
@@ -133,11 +125,10 @@ function Register() {
           </button>
         </form>
 
-        {/* FOOTER */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
           <Link
-            to="/login"
+            to="/admin/login" // CHANGED: from "/login" to "/admin/login"
             className="text-black font-semibold hover:underline"
           >
             Login

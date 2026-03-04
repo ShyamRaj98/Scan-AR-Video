@@ -1,3 +1,4 @@
+// frontend/src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       if (response.data && response.data.token) {
         localStorage.setItem("user", JSON.stringify(response.data));
         setUser(response.data);
-        navigate(redirectPath);
+        navigate(redirectPath); // Navigate to /admin after registration
         return response.data;
       } else {
         throw new Error("Invalid response from server");
@@ -68,7 +69,7 @@ export const AuthProvider = ({ children }) => {
       if (response.data && response.data.token) {
         localStorage.setItem("user", JSON.stringify(response.data));
         setUser(response.data);
-        navigate(redirectPath);
+        navigate(redirectPath); // Navigate to /admin after login
         return response.data;
       } else {
         throw new Error("Invalid response from server");
@@ -83,7 +84,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    navigate("/login");
+    navigate("/admin/login"); // CHANGED: from "/login" to "/admin/login"
   };
 
   const getToken = () => {
