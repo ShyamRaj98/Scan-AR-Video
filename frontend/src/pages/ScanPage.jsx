@@ -43,17 +43,32 @@ export default function ScanPage() {
         const anchor = mindarThree.addAnchor(index);
 
         const video = document.createElement("video");
+
         video.src = marker.videoUrl;
         video.crossOrigin = "anonymous";
+
         video.loop = true;
         video.muted = true;
         video.playsInline = true;
+        video.autoplay = true;
+
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+        video.setAttribute("muted", "");
+        video.setAttribute("autoplay", "");
+
+        // VERY IMPORTANT
+        video.load();
 
         const texture = new THREE.VideoTexture(video);
+        texture.encoding = THREE.sRGBEncoding;
+        texture.needsUpdate = true;
 
         const geometry = new THREE.PlaneGeometry(1, 0.6);
         const material = new THREE.MeshBasicMaterial({
           map: texture,
+          side: THREE.DoubleSide,
+          toneMapped: false,
         });
 
         const plane = new THREE.Mesh(geometry, material);
