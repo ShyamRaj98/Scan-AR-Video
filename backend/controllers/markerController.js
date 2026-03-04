@@ -85,16 +85,30 @@ export const deleteMarker = async (req, res) => {
       return res.status(404).json({ message: "Marker not found" });
     }
 
-    // Delete media from Cloudinary
-    await cloudinary.uploader.destroy(marker.imagePublicId);
-    await cloudinary.uploader.destroy(marker.videoPublicId, {
-      resource_type: "video",
-    });
+    console.log("Deleting marker:", marker._id);
+    console.log("Image Public ID:", marker.imagePublicId);
+    console.log("Video Public ID:", marker.videoPublicId);
+
+    // Delete image only if exists
+    if (marker.imagePublicId) {
+      await cloudinary.uploader.destroy(marker.imagePublicId);
+    }
+
+    // Delete video only if exists
+    if (marker.videoPublicId) {
+      await cloudinary.uploader.destroy(marker.videoPublicId, {
+        resource_type: "video",
+      });
+    }
 
     await marker.deleteOne();
 
     res.json({ message: "Marker deleted successfully" });
+
   } catch (error) {
-    res.status(500).json({ message: "Delete failed" });
+    console.error("DELETE ERROR:", error);
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
