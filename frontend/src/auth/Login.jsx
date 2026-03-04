@@ -8,11 +8,10 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const submitHandle = async () => {
+  const submitHandle = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -23,9 +22,9 @@ function Login() {
       setError("");
       setLoading(true);
       await login(email, password);
-      navigate("/admin/dashboard");
+      // Navigation happens in the login function
     } catch (err) {
-      setError(err.response.data.message);
+      setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -56,6 +55,7 @@ function Login() {
               className="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -69,6 +69,7 @@ function Login() {
                 className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
               <span
                 onClick={() => setShowPassword(!showPassword)}
@@ -91,7 +92,7 @@ function Login() {
 
         {/* FOOTER */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Link
             to="/register"
             className="text-black font-semibold hover:underline"

@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext"; // This is a function
+import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
 function Register() {
-  // Call the hook to get the auth functions
-  const { register } = useAuth(); // Add parentheses to call the function
+  const { register } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -18,10 +17,8 @@ function Register() {
   const submitHandle = async (e) => {
     e.preventDefault();
 
-    // Clear previous errors
     setError("");
 
-    // Validation
     if (!name || !email || !password || !confirmPassword) {
       return setError("All fields are required");
     }
@@ -39,11 +36,9 @@ function Register() {
       await register(name, email, password);
       // Navigation happens in the register function
     } catch (err) {
-      // Handle error safely
       const errorMessage =
         err.response?.data?.message || err.message || "Registration failed";
       setError(errorMessage);
-      navigate("/admin")
     } finally {
       setLoading(false);
     }

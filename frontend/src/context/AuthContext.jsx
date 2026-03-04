@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const register = async (name, email, password) => {
+  const register = async (name, email, password, redirectPath = "/admin") => {
     try {
       setError(null);
       const response = await axios.post("/auth/register", {
@@ -38,25 +38,24 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      console.log("Registration response:", response.data); // Debug log
+      console.log("Registration response:", response.data);
 
-      // Your backend returns user object with token
       if (response.data && response.data.token) {
-        // Store the entire user object
         localStorage.setItem("user", JSON.stringify(response.data));
         setUser(response.data);
-        navigate("/");
+        navigate(redirectPath);
+        return response.data;
       } else {
         throw new Error("Invalid response from server");
       }
     } catch (error) {
       console.error("Registration error:", error);
       setError(error.response?.data?.message || "Registration failed");
-      throw error; // Re-throw to handle in component
+      throw error;
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (email, password, redirectPath = "/admin") => {
     try {
       setError(null);
       const response = await axios.post("/auth/login", {
@@ -64,12 +63,13 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      console.log("Login response:", response.data); // Debug log
+      console.log("Login response:", response.data);
 
       if (response.data && response.data.token) {
         localStorage.setItem("user", JSON.stringify(response.data));
         setUser(response.data);
-        navigate("/");
+        navigate(redirectPath);
+        return response.data;
       } else {
         throw new Error("Invalid response from server");
       }
@@ -86,7 +86,6 @@ export const AuthProvider = ({ children }) => {
     navigate("/login");
   };
 
-  // Helper to get token for API requests
   const getToken = () => {
     return user?.token || null;
   };
