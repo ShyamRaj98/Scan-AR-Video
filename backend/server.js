@@ -26,6 +26,11 @@ app.get("/", (req, res) => {
 
 app.use("/uploads", express.static("uploads"));
 
+app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR:", err);
+  res.status(500).json({ message: err.message });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

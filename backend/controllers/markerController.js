@@ -17,7 +17,7 @@ const uploadToCloudinary = (fileBuffer, folder, resourceType = "image") => {
       (error, result) => {
         if (result) resolve(result);
         else reject(error);
-      }
+      },
     );
 
     streamifier.createReadStream(fileBuffer).pipe(stream);
@@ -36,14 +36,14 @@ export const createMarker = async (req, res) => {
     const imageUpload = await uploadToCloudinary(
       markerImageFile.buffer,
       "ar-markers",
-      "image"
+      "image",
     );
 
     // Upload video (compressed automatically)
     const videoUpload = await uploadToCloudinary(
       videoFile.buffer,
       "ar-videos",
-      "video"
+      "video",
     );
 
     const marker = await Marker.create({
@@ -52,7 +52,7 @@ export const createMarker = async (req, res) => {
       videoUrl: videoUpload.secure_url,
       imagePublicId: imageUpload.public_id,
       videoPublicId: videoUpload.public_id,
-      createdBy: req.user._id,
+      createdBy: req.user?._id || null,
     });
 
     res.status(201).json(marker);

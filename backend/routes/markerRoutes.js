@@ -1,5 +1,9 @@
 import express from "express";
-import { createMarker, getMarkers, deleteMarker } from "../controllers/markerController.js";
+import {
+  createMarker,
+  getMarkers,
+  deleteMarker,
+} from "../controllers/markerController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 
@@ -13,7 +17,7 @@ router.post(
     { name: "markerImage", maxCount: 1 },
     { name: "video", maxCount: 1 },
   ]),
-  createMarker
+  createMarker,
 );
 
 // Get all markers (public)
