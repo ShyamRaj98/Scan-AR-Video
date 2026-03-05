@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.1",
+    "aframe": "^1.7.1",
     "axios": "^1.13.6",
     "lucide-react": "^0.576.0",
     "mind-ar": "^1.2.5",

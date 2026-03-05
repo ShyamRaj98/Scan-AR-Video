@@ -24,63 +24,173 @@ body,
 } */
 
 /* Add these styles to your global CSS file (index.css) */
+/* Fullscreen base styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y pinch-zoom; /* Allow vertical scroll but disable pinch zoom */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
 
+/* Disable zoom on all elements */
+* {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation; /* Disable double-tap zoom */
+}
+
+/* Camera video fullscreen */
+video {
+  object-fit: cover !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+}
+
+/* A-Frame canvas */
+.a-canvas {
+  width: 100vw !important;
+  height: 100vh !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+}
+
+/* Animations */
 @keyframes scan {
-  0% {
-    top: 0;
-  }
-
-  50% {
-    top: 100%;
-  }
-
-  100% {
-    top: 0;
-  }
-}
-
-@keyframes scan-simple {
-  0% {
-    top: 0;
-  }
-
-  50% {
-    top: 100%;
-  }
-
-  100% {
-    top: 0;
-  }
-}
-
-@keyframes progress {
-  0% {
-    width: 0%;
-  }
-
-  50% {
-    width: 70%;
-  }
-
-  100% {
-    width: 100%;
-  }
+  0% { top: 0; opacity: 1; }
+  50% { top: 100%; opacity: 0.5; }
+  100% { top: 0; opacity: 1; }
 }
 
 .animate-scan {
   animation: scan 3s ease-in-out infinite;
 }
 
-.animate-scan-simple {
-  animation: scan-simple 2.5s linear infinite;
+/* Hide AR.js loading elements */
+.a-loader-title,
+.a-enter-vr,
+.a-enter-ar,
+.mindar-ui-overlay {
+  display: none !important;
+}
+
+/* Responsive helpers */
+@media (max-width: 380px) {
+  .xs\:inline {
+    display: inline;
+  }
+  .xs\:hidden {
+    display: none;
+  }
+}
+
+/* Fullscreen fixes */
+/* html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  touch-action: none; 
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+} */
+
+/* Disable pinch zoom */
+/* * {
+  touch-action: pan-y pinch-zoom; 
+} */
+
+/* Camera video fullscreen */
+/* video {
+  object-fit: cover !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important; 
+} */
+
+/* A-Frame canvas fullscreen */
+/* .a-canvas {
+  width: 100vw !important;
+  height: 100vh !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+}
+
+/* Animations */
+/* @keyframes scan {
+  0% { top: 0; opacity: 1; }
+  50% { top: 100%; opacity: 0.5; }
+  100% { top: 0; opacity: 1; }
+}
+
+@keyframes progress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.animate-scan {
+  animation: scan 3s ease-in-out infinite;
 }
 
 .animate-progress {
   animation: progress 2s ease-out forwards;
-}
+}  */
 
-@media (max-width: 640px) {
-  .animate-scan-simple {
-    animation-duration: 2s;
+/* Hide AR.js loading elements */
+/* .a-loader-title,
+.a-enter-vr,
+.a-enter-ar,
+.mindar-ui-overlay {
+  display: none !important;
+} */
+
+/* Responsive helpers */
+/* @media (max-width: 380px) {
+  .xs\:inline {
+    display: inline;
   }
-}
+  .xs\:hidden {
+    display: none;
+  }
+} */
+
+/* Disable zoom on all elements */
+ /* * {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}  */

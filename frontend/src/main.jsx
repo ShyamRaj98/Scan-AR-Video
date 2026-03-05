@@ -4,11 +4,13 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import "./index.css";
 import "./App.css";
+// import "aframe";
+// import "mind-ar/dist/mindar-image-aframe.prod.js";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <AuthProvider>
       <App />
     </AuthProvider>
-  </BrowserRouter>
+  </BrowserRouter>,
 );

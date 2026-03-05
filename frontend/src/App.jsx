@@ -4,6 +4,7 @@ import Login from "./auth/Login";
 import Register from "./auth/Register";
 import Home from "./pages/Home";
 import ScanPage from "./pages/ScanPage";
+// import ScanPage from "./components/ARCamera";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import AdminLayout from "../layout/AdminLayout";
 import Dashboard from "./pages/Admin/Dashboard";
