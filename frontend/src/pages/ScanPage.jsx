@@ -28,32 +28,41 @@ export default function ScanPage() {
       if (e.ctrlKey) e.preventDefault();
     };
     const preventKeyboardZoom = (e) => {
-      if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '_')) {
+      if (
+        e.ctrlKey &&
+        (e.key === "+" || e.key === "-" || e.key === "=" || e.key === "_")
+      ) {
         e.preventDefault();
       }
     };
 
-    document.addEventListener('touchmove', preventPinchZoom, { passive: false });
-    document.addEventListener('gesturestart', preventGesture);
-    document.addEventListener('gesturechange', preventGesture);
-    document.addEventListener('gestureend', preventGesture);
-    document.addEventListener('wheel', preventWheelZoom, { passive: false });
-    document.addEventListener('keydown', preventKeyboardZoom);
+    document.addEventListener("touchmove", preventPinchZoom, {
+      passive: false,
+    });
+    document.addEventListener("gesturestart", preventGesture);
+    document.addEventListener("gesturechange", preventGesture);
+    document.addEventListener("gestureend", preventGesture);
+    document.addEventListener("wheel", preventWheelZoom, { passive: false });
+    document.addEventListener("keydown", preventKeyboardZoom);
 
     let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) e.preventDefault();
-      lastTouchEnd = now;
-    }, false);
+    document.addEventListener(
+      "touchend",
+      (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = now;
+      },
+      false,
+    );
 
     return () => {
-      document.removeEventListener('touchmove', preventPinchZoom);
-      document.removeEventListener('gesturestart', preventGesture);
-      document.removeEventListener('gesturechange', preventGesture);
-      document.removeEventListener('gestureend', preventGesture);
-      document.removeEventListener('wheel', preventWheelZoom);
-      document.removeEventListener('keydown', preventKeyboardZoom);
+      document.removeEventListener("touchmove", preventPinchZoom);
+      document.removeEventListener("gesturestart", preventGesture);
+      document.removeEventListener("gesturechange", preventGesture);
+      document.removeEventListener("gestureend", preventGesture);
+      document.removeEventListener("wheel", preventWheelZoom);
+      document.removeEventListener("keydown", preventKeyboardZoom);
     };
   }, []);
 
@@ -75,15 +84,15 @@ export default function ScanPage() {
   useEffect(() => {
     const checkCameraPermission = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
             facingMode: "environment",
             width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          } 
+            height: { ideal: 1080 },
+          },
         });
         setCameraPermission(true);
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       } catch (err) {
         setCameraPermission(false);
         setLoading(false);
@@ -98,6 +107,7 @@ export default function ScanPage() {
 
     let mindarThree;
     const videoElements = [];
+    const videoTextures = [];
 
     const startAR = async () => {
       try {
@@ -130,7 +140,7 @@ export default function ScanPage() {
         // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
-        
+
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
         directionalLight.position.set(0, 1, 1);
         scene.add(directionalLight);
@@ -138,7 +148,7 @@ export default function ScanPage() {
         // Create markers and videos
         markers.forEach((marker, index) => {
           console.log(`Creating anchor for marker ${index}:`, marker);
-          
+
           const anchor = mindarThree.addAnchor(index);
 
           // Create video element for overlay
@@ -146,24 +156,36 @@ export default function ScanPage() {
           videoElement.src = marker.videoUrl;
           videoElement.crossOrigin = "anonymous";
           videoElement.loop = true;
-          videoElement.muted = false; // Allow sound
+          videoElement.muted = false;
           videoElement.playsInline = true;
-          videoElement.autoplay = false; // Don't autoplay, we'll control it
+          videoElement.autoplay = false;
           videoElement.preload = "auto";
 
           videoElement.setAttribute("playsinline", "");
           videoElement.setAttribute("webkit-playsinline", "");
           videoElement.setAttribute("preload", "auto");
-          
-          // Load video
+
+          // Ensure video is ready
           videoElement.load();
           videoElements.push(videoElement);
 
-          // Create video texture
+          // Wait for video metadata to load
+          videoElement.addEventListener("loadedmetadata", () => {
+            console.log(
+              `Video ${index} metadata loaded:`,
+              videoElement.videoWidth,
+              "x",
+              videoElement.videoHeight,
+            );
+          });
+
+          // Create video texture with proper settings
           const texture = new THREE.VideoTexture(videoElement);
           texture.minFilter = THREE.LinearFilter;
           texture.magFilter = THREE.LinearFilter;
           texture.format = THREE.RGBAFormat;
+          texture.needsUpdate = true;
+          videoTextures.push(texture);
 
           // Responsive video plane size
           const isMobile = window.innerWidth < 768;
@@ -176,55 +198,80 @@ export default function ScanPage() {
             transparent: true,
             opacity: 0,
             side: THREE.DoubleSide,
-            depthWrite: false,
+            depthWrite: true,
             depthTest: true,
+            color: 0xffffff,
+            toneMapped: false, // Prevent color correction issues
           });
 
           const plane = new THREE.Mesh(geometry, material);
-          plane.position.set(0, 0, 0.1); // Slightly forward to ensure visibility
+
+          // Position the plane at the marker
+          plane.position.set(0, 0, 0.2); // Increased forward position
+          plane.scale.set(1, 1, 1);
+          plane.visible = true;
+
           anchor.group.add(plane);
+
+          // Debug: Add a helper box to see if anchor is working
+          const helperBox = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1, 0.1, 0.1),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+          );
+          anchor.group.add(helperBox);
 
           // Target found handler
           anchor.onTargetFound = async () => {
             console.log(`Target ${index} found!`);
             setTargetFound(true);
             setCurrentMarkerIndex(index);
-            
+
             try {
               // Reset and play video
               videoElement.currentTime = 0;
               const playPromise = videoElement.play();
-              
+
               if (playPromise !== undefined) {
                 playPromise
                   .then(() => {
                     console.log(`Video ${index} started playing`);
-                    
-                    // Smooth fade in
-                    let opacity = 0;
-                    const fade = setInterval(() => {
-                      opacity += 0.05;
-                      material.opacity = Math.min(opacity, 1);
-                      if (opacity >= 1) clearInterval(fade);
-                    }, 30);
+
+                    // Force texture update
+                    texture.needsUpdate = true;
+
+                    // Make plane visible immediately
+                    material.opacity = 1;
+                    plane.visible = true;
+
+                    // Ensure video is playing
+                    if (videoElement.paused) {
+                      videoElement.play();
+                    }
                   })
-                  .catch(err => {
+                  .catch((err) => {
                     console.log(`Video ${index} play error:`, err);
-                    
+
                     // Try playing on user interaction
                     const playOnInteraction = () => {
-                      videoElement.play()
+                      videoElement
+                        .play()
                         .then(() => {
-                          console.log(`Video ${index} started after interaction`);
+                          console.log(
+                            `Video ${index} started after interaction`,
+                          );
                           material.opacity = 1;
+                          texture.needsUpdate = true;
                         })
-                        .catch(e => console.log("Still can't play:", e));
-                      document.removeEventListener('click', playOnInteraction);
-                      document.removeEventListener('touchstart', playOnInteraction);
+                        .catch((e) => console.log("Still can't play:", e));
+                      document.removeEventListener("click", playOnInteraction);
+                      document.removeEventListener(
+                        "touchstart",
+                        playOnInteraction,
+                      );
                     };
-                    
-                    document.addEventListener('click', playOnInteraction);
-                    document.addEventListener('touchstart', playOnInteraction);
+
+                    document.addEventListener("click", playOnInteraction);
+                    document.addEventListener("touchstart", playOnInteraction);
                   });
               }
             } catch (e) {
@@ -239,6 +286,7 @@ export default function ScanPage() {
             setCurrentMarkerIndex(null);
             videoElement.pause();
             material.opacity = 0;
+            plane.visible = false;
           };
         });
 
@@ -247,29 +295,36 @@ export default function ScanPage() {
 
         // Force video element to fullscreen
         setTimeout(() => {
-          const videoElement = document.querySelector('video');
+          const videoElement = document.querySelector("video");
           if (videoElement) {
             videoRef.current = videoElement;
-            videoElement.style.position = 'fixed';
-            videoElement.style.top = '0';
-            videoElement.style.left = '0';
-            videoElement.style.width = '100vw';
-            videoElement.style.height = '100vh';
-            videoElement.style.objectFit = 'cover';
-            videoElement.style.transform = 'scaleX(-1)';
-            videoElement.style.zIndex = '1';
-            videoElement.style.pointerEvents = 'none';
+            videoElement.style.position = "fixed";
+            videoElement.style.top = "0";
+            videoElement.style.left = "0";
+            videoElement.style.width = "100vw";
+            videoElement.style.height = "100vh";
+            videoElement.style.objectFit = "cover";
+            videoElement.style.transform = "scaleX(-1)";
+            videoElement.style.zIndex = "1";
+            videoElement.style.pointerEvents = "none";
           }
         }, 100);
 
         setLoading(false);
         setCameraReady(true);
 
+        // Animation loop with texture update
         renderer.setAnimationLoop(() => {
+          // Update textures for playing videos
+          videoTextures.forEach((texture) => {
+            if (texture) {
+              texture.needsUpdate = true;
+            }
+          });
+
           camera.updateMatrixWorld();
           renderer.render(scene, camera);
         });
-
       } catch (error) {
         console.error("AR start error:", error);
         setLoading(false);
@@ -286,9 +341,9 @@ export default function ScanPage() {
         }
       }
       // Cleanup videos
-      videoElements.forEach(video => {
+      videoElements.forEach((video) => {
         video.pause();
-        video.src = '';
+        video.src = "";
         video.load();
       });
     };
@@ -314,7 +369,9 @@ export default function ScanPage() {
       <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4 z-50">
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-md text-center">
           <div className="text-6xl mb-4">📷</div>
-          <h2 className="text-2xl font-bold text-white mb-4">Camera Access Required</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Camera Access Required
+          </h2>
           <p className="text-gray-300 mb-6">
             Please allow camera access to use AR features.
           </p>
@@ -332,7 +389,11 @@ export default function ScanPage() {
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-black">
       {/* AR Canvas */}
-      <div ref={containerRef} className="fixed inset-0 w-full h-full" style={{ zIndex: 10 }} />
+      <div
+        ref={containerRef}
+        className="fixed inset-0 w-full h-full"
+        style={{ zIndex: 10 }}
+      />
 
       {/* Loading Screen */}
       {loading && (
@@ -341,13 +402,13 @@ export default function ScanPage() {
             <div className="w-16 h-16 md:w-20 md:h-20 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-6" />
             <div className="absolute inset-0 w-16 h-16 md:w-20 md:h-20 border-4 border-purple-500/30 rounded-full animate-ping" />
           </div>
-          
+
           <h2 className="text-xl md:text-2xl font-semibold tracking-wide text-center">
             Preparing AR Experience
           </h2>
-          
+
           <p className="text-sm md:text-base text-gray-400 mt-3 text-center max-w-xs">
-            {cameraPermission === null 
+            {cameraPermission === null
               ? "Requesting camera access..."
               : "Loading markers and videos..."}
           </p>
@@ -369,7 +430,7 @@ export default function ScanPage() {
                         backdrop-blur-[2px]"
             >
               <div className="absolute w-1 h-1 bg-purple-500/50 rounded-full" />
-              
+
               <div
                 className="absolute left-0 w-full h-[2px] 
                             bg-gradient-to-r from-transparent via-purple-500 to-transparent
@@ -387,17 +448,6 @@ export default function ScanPage() {
                 Align image inside the frame
               </p>
             </div>
-
-            <div className="absolute top-[15%] left-0 right-0 hidden md:flex justify-center gap-8 text-white/60 text-sm">
-              <div className="flex flex-col items-center">
-                <span className="text-2xl mb-1">⬆️</span>
-                <span>Move closer</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-2xl mb-1">🔄</span>
-                <span>Rotate</span>
-              </div>
-            </div>
           </div>
         </div>
       )}
@@ -411,7 +461,7 @@ export default function ScanPage() {
               <span className="font-medium">Image Detected!</span>
               <span className="text-lg sm:text-xl">✨</span>
             </div>
-            
+
             {/* Video status indicator */}
             {currentMarkerIndex !== null && (
               <div className="mt-2 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full text-white/90 text-xs sm:text-sm text-center">
@@ -440,13 +490,15 @@ export default function ScanPage() {
 
       {/* Camera Status */}
       {cameraReady && !loading && (
-        <div className="fixed bottom-4 right-4 z-50 
+        <div
+          className="fixed bottom-4 right-4 z-50 
                         bg-black/50 backdrop-blur-md 
                         text-white px-3 py-1.5 sm:px-4 sm:py-2 
                         rounded-full text-xs sm:text-sm
                         border border-green-500/50
                         flex items-center gap-2
-                        touch-action-none">
+                        touch-action-none"
+        >
           <span className="relative flex h-2 w-2 sm:h-3 sm:w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-green-500"></span>
